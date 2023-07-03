@@ -1,0 +1,62 @@
+//sudo stap teste_mem.stp
+
+probe begin
+{
+    printf ("Checking memory...\n")
+}
+
+probe process("/lib/x86_64-linux-gnu/libc.so.6").function("malloc")
+{
+    sizes=sprintf("%s",substr($$parms,6,strlen($$parms)-6));
+    tam = strtol(sizes,16) 
+    
+    tam = (tam / (1024));
+
+    if(tam>100000000)
+    {    
+        command = sprintf("/home/teste/Downloads/Mem/systemtap/aloca %ld",tam);
+        system(command);
+    }
+}
+
+
+probe process("/lib/x86_64-linux-gnu/libc.so.6").function("calloc")
+{
+   nelems=sprintf("%s",tokenize($$parms," ")); 
+   sizeof=sprintf("%s",substr($$parms,strlen(nelems)+11,strlen($$parms)-strlen(nelems))); 
+   nelems=sprintf("%s",substr(nelems,2,strlen($$parms)-2)); 
+   nelems2 = strtol(nelems,16) //megabytes  //numero elementos
+   sizeof2 = strtol(sizeof,16) //megabytes  //tam
+
+   tam=nelems2*sizeof2;	
+   tam = (tam / (1024));
+      
+   if(tam>100000000)
+   {
+        command = sprintf("/home/teste/Downloads/Mem/systemtap/aloca %ld",tam);
+        system(command);
+    }
+}
+
+
+probe process("/lib/x86_64-linux-gnu/libc.so.6").function("realloc")
+{
+   oldmem=sprintf("%s",tokenize($$parms," ")); 
+   sizeof=sprintf("%s",substr($$parms,strlen(oldmem)+7,strlen($$parms)-strlen(oldmem))); 
+   oldmem=sprintf("%s",substr(oldmem,9,strlen($$parms)-2)); 
+   sizeof2 = strtol(sizeof,16) //megabytes  //tam
+
+   tam=sizeof2;
+   tam = (tam / (1024));
+ 
+   if(tam>100000000)
+   {
+        command = sprintf("/home/teste/Downloads/Mem/systemtap/aloca %ld",tam);
+        system(command);
+    }
+}
+
+
+
+
+
